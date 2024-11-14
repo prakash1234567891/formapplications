@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Details Form</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: hsl(0, 92%, 53%); }
+        .btn { cursor: pointer; padding: 5px 10px; margin: 5px; }
+        .btn-edit { background-color: #4CAF50; color: white; }
+        .btn-delete { background-color: #f44336; color: white; }
+        .btn-view { background-color: #2196F3; color: white; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); align-items: center; justify-content: center; }
+        .modal-content { position: relative; background-color: white; padding: 20px; width: 80%; max-width: 600px; text-align: center; }
+        .modal-content img { max-width: 100%; height: auto; display: block; margin: 10px 0; }
+        .close, .next { position: absolute; bottom: 10px; background-color: #4CAF50; color: white; padding: 8px; border: none; cursor: pointer; font-size: 16px; }
+        .close { right: 10px; }
+        .next { left: 10px; }
+    </style>
+</head>
+<body>
+
+<h2>User Details Form</h2>
+<form id="detailsForm">
+    <label for="photo">Upload Photo:</label>
+    <input type="file" id="photo" accept="image/*" required><br><br>
+
+    <label for="name">Name:</label>
+    <input type="text" id="name" required><br><br>
+
+    <label for="address">Address:</label>
+    <input type="text" id="address" required><br><br>
+
+    <label for="aadhaar">Aadhaar Number:</label>
+    <input type="text" id="aadhaar" required><br><br>
+
+    <h3>DOCUMENT Details</h3>
+    <label for="aadhaarImage">Aadhaar Image:</label>
+    <input type="file" id="aadhaarImage" accept="image/*" required><br><br>
+
+    <label for="landDetails">Land Details:</label>
+    <input type="text" id="landDetails" required><br><br>
+    
+    <label for="landImage">Upload Land Image:</label>
+    <input type="file" id="landImage" accept="image/*" required><br><br>
+
+    <label for="consentLetter">Letter of Consent:</label>
+    <input type="file" id="consentLetter" accept="image/*" required><br><br>
+
+    <button type="submit">Submit</button>
+</form>
+
+<h2>Submitted Details</h2>
+<table id="detailsTable">
+    <thead>
+        <tr>
+            <th>Photo</th>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Aadhaar Number</th>
+            <th>Aadhaar Image</th>
+            <th>Land Details</th>
+            <th>Land Image</th>
+            <th>Letter of Consent</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Data will be populated here -->
+    </tbody>
+</table>
+
+<!-- Modal for viewing images -->
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <h2>Image View</h2>
+        <div id="modalImageContainer">
+            <img id="modalImage" src="" alt="Detail Image">
+        </div>
+        <button class="close" onclick="closeModal()">Close</button>
+        <button class="next" onclick="nextImage()">Next</button>
+    </div>
+</div>
+
+<script>
+let images = [];
+let currentIndex = 0;
+
+document.getElementById('detailsForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const photo = document.getElementById('photo').files[0];
+    const name = document.getElementById('name').value;
+    const address = document.getElementById('address').value;
+    const aadhaar = document.getElementById('aadhaar').value;
+    const aadhaarImage = document.getElementById('aadhaarImage').files[0];
+    const landDetails = document.getElementById('landDetails').value;
+    const landImage = document.getElementById('landImage').files[0];
+    const consentLetter = document.getElementById('consentLetter').files[0];
+
+    const table = document.getElementById('detailsTable').getElementsByTagName('tbody')[0];
+    const newRow = table.insertRow();
+
+    const cell1 = newRow.insertCell(0);
+    const cell2 = newRow.insertCell(1);
+    const cell3 = newRow.insertCell(2);
+    const cell4 = newRow.insertCell(3);
+    const cell5 = newRow.insertCell(4);
+    const cell6 = newRow.insertCell(5);
+    const cell7 = newRow.insertCell(6);
+    const cell8 = newRow.insertCell(7);
+    const cell9 = newRow.insertCell(8);
+
+    const photoURL = URL.createObjectURL(photo);
+    const aadhaarImageURL = URL.createObjectURL(aadhaarImage);
+    const landImageURL = URL.createObjectURL(landImage);
+    const consentLetterURL = URL.createObjectURL(consentLetter);
+
+    cell1.innerHTML = `<img src="${photoURL}" alt="Photo" width="50" height="50">`;
+    cell2.innerText = name;
+    cell3.innerText = address;
+    cell4.innerText = aadhaar;
+    cell5.innerHTML = `<img src="${aadhaarImageURL}" alt="Aadhaar Image" width="50" height="50">`;
+    cell6.innerText = landDetails;
+    cell7.innerHTML = `<img src="${landImageURL}" alt="Land Image" width="50" height="50">`;
+    cell8.innerHTML = `<img src="${consentLetterURL}" alt="Consent Letter" width="50" height="50">`;
+    cell9.innerHTML = `<button class="btn btn-view" onclick="viewDetails('${photoURL}', '${aadhaarImageURL}', '${landImageURL}', '${consentLetterURL}')">View</button>
+                      <button class="btn btn-edit" onclick="editRow(this)">Edit</button>
+                      <button class="btn btn-delete" onclick="deleteRow(this)">Delete</button>`;
+
+    document.getElementById('detailsForm').reset();
+});
+
+function viewDetails(photoURL, aadhaarImageURL, landImageURL, consentLetterURL) {
+    images = [photoURL, aadhaarImageURL, landImageURL, consentLetterURL];
+    currentIndex = 0;
+    document.getElementById('modalImage').src = images[currentIndex];
+    document.getElementById('modal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+}
+
+function nextImage() {
+    currentIndex = (currentIndex + 1) % images.length;
+    document.getElementById('modalImage').src = images[currentIndex];
+}
+
+function deleteRow(button) {
+    const row = button.parentNode.parentNode;
+    row.remove();
+}
+
+function editRow(button) {
+    const row = button.parentNode.parentNode;
+    document.getElementById('photo').files[0] = row.cells[0].querySelector('img').src;
+    document.getElementById('name').value = row.cells[1].innerText;
+    document.getElementById('address').value = row.cells[2].innerText;
+    document.getElementById('aadhaar').value = row.cells[3].innerText;
+    document.getElementById('aadhaarImage').files[0] = row.cells[4].querySelector('img').src;
+    document.getElementById('landDetails').value = row.cells[5].innerText;
+    document.getElementById('landImage').files[0] = row.cells[6].querySelector('img').src;
+    document.getElementById('consentLetter').files[0] = row.cells[7].querySelector('img').src;
+
+    row.remove();
+}
+</script>
+</body>
+</html>
